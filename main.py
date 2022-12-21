@@ -8,8 +8,10 @@ from global_planner.rrt import RRT
 
 if __name__ == '__main__':
     # Program variables
-    c_space_dimension_boundaries = np.array([200, 400], dtype='int')
-    c_space_obstacle_points = np.array([])
+    c_space_dimension_boundaries = np.array([500, 500], dtype='int')
+    
+    obs_x, obs_y = (70, 70)
+    c_space_obstacle_points = np.array([[(obs_x-10, obs_y-10), (obs_x-15, obs_y), (obs_x-10, obs_y+10), (obs_x+5, obs_y+10), (obs_x+10, obs_y), (obs_x+5, obs_y-10)]])
 
     # Initiate pygame and give permission
     pygame.init()
