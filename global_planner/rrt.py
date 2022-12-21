@@ -24,10 +24,10 @@ class FailedToGeneratePath(Exception):
 
 
 class RRT:
-    """Base class to generate a global path using the RRT algorithm"""
+    """Base class to generate a global path using the rrt algorithm"""
 
     def __init__(self, c_space_dimensions: np.array, c_space_obstacles: np.array):
-        """ Create an RRT object which can be used to generate paths in a given configuration space
+        """ Create a rrt object which can be used to generate paths in a given configuration space
         :param c_space_dimensions: The outer boundaries of the configuration space
         :param c_space_obstacles: Array of the obstacle contours in the configuration space
         """
@@ -36,11 +36,11 @@ class RRT:
 
         self.polygon_c_space_obstacles = [Polygon(obstacle) for obstacle in self.c_space_obstacles]
 
-        self.nodes = np.empty((0, 2))
-        self.edges = np.empty((0, 2))
+        self.nodes = np.empty((0, 2), dtype='int')
+        self.edges = np.empty((0, 2), dtype='int')
 
     def build_roadmap(self, q_init, q_goal, max_iterations=1000, intermediate_goal_check=False):
-        """ Build the RRT roadmap tree from a given start to given end configuration
+        """ Build the rrt roadmap tree from a given start to given end configuration
         :param q_init: Starting position of the tree
         :param q_goal: Ending position for the tree
         :param max_iterations: Max number of expansions
@@ -111,7 +111,7 @@ class RRT:
         return self.nodes, self.edges
 
     def generate_shortest_path(self, q_init, q_goal):
-        """Find the shortest RRT path in the created roadmap.
+        """Find the shortest rrt path in the created roadmap.
         :param q_init: Starting position of the tree
         :param q_goal: Ending position for the tree
 

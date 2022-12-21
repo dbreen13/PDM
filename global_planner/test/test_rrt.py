@@ -23,6 +23,7 @@ if __name__ == '__main__':
 
     # plot the obstacles
     for polygon_obstacle in rrt_global_planner.polygon_c_space_obstacles:
+        print(polygon_obstacle.exterior.xy)
         plt.plot(*polygon_obstacle.exterior.xy, color='blue', linewidth=2)
 
     # plot the nodes as points in the graph
