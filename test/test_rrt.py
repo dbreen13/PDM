@@ -1,14 +1,20 @@
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+
 import numpy as np
-from rrt import RRT
+
+from map_environment.obstacles import Rectangle
+from global_planner.rrt import RRT
 
 if __name__ == '__main__':
-    c_space_dimension_boundaries = np.array([200, 400], dtype='int')
+    shelf_1 = Rectangle(np.array([50, 50]), np.array([20, 200]))
+    shelf_2 = Rectangle(np.array([100, 50]), np.array([20, 200]))
+    shelf_3 = Rectangle(np.array([150, 50]), np.array([20, 200]))
+    shelf_4 = Rectangle(np.array([200, 50]), np.array([20, 200]))
+    shelf_5 = Rectangle(np.array([250, 50]), np.array([20, 200]))
 
-    obstacle_1 = np.array([[50, 50], [50, 100], [75, 125], [100, 100], [100, 50], [75, 25]])
-    obstacle_2 = np.array([[10, 150], [10, 175], [75, 175], [180, 175], [180, 150], [75, 150]])
-
-    c_space_obstacle_points = np.array([obstacle_1, obstacle_2])
+    c_space_dimension_boundaries = np.array([500, 500], dtype='int')
+    c_space_obstacle_points = np.array([shelf_1, shelf_2, shelf_3, shelf_4, shelf_5])
 
     starting_point = np.array([0, 0], dtype='int')
     ending_point = np.array([175, 375], dtype='int')
@@ -18,13 +24,14 @@ if __name__ == '__main__':
     shortest_path_edges = rrt_global_planner.generate_shortest_path(starting_point, ending_point)
 
     # plot the beginning and ending point
-    plt.scatter(starting_point[0], starting_point[1], s=10, c="red")
-    plt.scatter(ending_point[0], ending_point[1], s=10, c="red")
+    fig, ax = plt.subplots()
+    ax.scatter(starting_point[0], starting_point[1], s=10, c="red")
+    ax.scatter(ending_point[0], ending_point[1], s=10, c="red")
 
     # plot the obstacles
-    for polygon_obstacle in rrt_global_planner.polygon_c_space_obstacles:
-        print(polygon_obstacle.exterior.xy)
-        plt.plot(*polygon_obstacle.exterior.xy, color='blue', linewidth=2)
+    for obstacle in rrt_global_planner.c_space_obstacles:
+        position, size = obstacle.position, obstacle.size
+        ax.add_patch(patches.Rectangle(position, *size))
 
     # plot the nodes as points in the graph
     plt.scatter(rrt_nodes[:, 0], rrt_nodes[:, 1], s=2, c="green")

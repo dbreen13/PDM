@@ -1,7 +1,5 @@
 import numpy as np
-
-from shapely.geometry import Point, Polygon
-
+import pygame
 
 class FailedBuildingRoadmap(Exception):
     """Base class to generate custom exception if building of roadmap failed."""
@@ -34,21 +32,26 @@ class RRT:
         self.c_space_dimensions = c_space_dimensions
         self.c_space_obstacles = c_space_obstacles
 
-        self.polygon_c_space_obstacles = [Polygon(obstacle) for obstacle in self.c_space_obstacles]
-
         self.nodes = np.empty((0, 2), dtype='int')
         self.edges = np.empty((0, 2), dtype='int')
 
-    def build_roadmap(self, q_init, q_goal, max_iterations=1000, intermediate_goal_check=False):
+    def build_roadmap(self, q_init, q_goal, max_iterations=100000, intermediate_goal_check=False, update_screen=True):
         """ Build the rrt roadmap tree from a given start to given end configuration
         :param q_init: Starting position of the tree
         :param q_goal: Ending position for the tree
         :param max_iterations: Max number of expansions
         :param intermediate_goal_check: Check between random samples if goal is reachable
+        :param update_screen: Update the pygame screen between iterations
 
         :return:
             Two arrays of the created nodes and edges
         """
+        if self.is_node_in_obstacle_space(q_init):
+            FailedToGeneratePath("Given initial configuration is in obstacle space.")
+
+        if self.is_node_in_obstacle_space(q_goal):
+            FailedToGeneratePath("Given goal configuration is in obstacle space.")
+
         self.nodes = np.empty((0, 2), dtype='int')
         self.edges = np.empty((0, 2), dtype='int')
 
@@ -89,10 +92,12 @@ class RRT:
                 created_node_idx = np.where(np.all(self.nodes == q_goal, axis=1))[0][0]
 
                 new_edge_indices = np.array([closest_node_idx, created_node_idx])
-
                 self.edges = np.vstack((self.edges, new_edge_indices))
 
                 break
+
+            if update_screen:
+                pygame.display.update()
 
         if q_goal.tolist() not in self.nodes.tolist():
             if not self.is_goal_reachable(q_goal):
@@ -105,7 +110,6 @@ class RRT:
             created_node_idx = np.where(np.all(self.nodes == q_goal, axis=1))[0][0]
 
             new_edge_indices = np.array([closest_node_idx, created_node_idx])
-
             self.edges = np.vstack((self.edges, new_edge_indices))
 
         return self.nodes, self.edges
@@ -154,8 +158,7 @@ class RRT:
         :return:
             True if node is in obstacle space, else False.
         """
-        node_as_point = Point(node)
-        return any(node_as_point.within(polygon) for polygon in self.polygon_c_space_obstacles)
+        return any(obstacle.is_point_in_shape_area(node) for obstacle in self.c_space_obstacles)
 
     def is_edge_in_obstacle_space(self, edge):
         """ Discretize linearly between two nodes and check if intermediate nodes are in obstacle space or free space.
@@ -168,8 +171,7 @@ class RRT:
         intermediate_nodes = self.discretize_edge(edge)
 
         for intermediate_node in intermediate_nodes:
-            intermediate_point = Point(intermediate_node)
-            if any(intermediate_point.within(polygon) for polygon in self.polygon_c_space_obstacles):
+            if any(obstacle.is_point_in_shape_area(intermediate_node) for obstacle in self.c_space_obstacles):
                 return True
 
         return False
