@@ -19,7 +19,7 @@ class dynamics:
         phi=X[2]
         v=X[3]
         
-        delta,a=u
+        a,delta=u
         
         #update the state
         x_dot=v*np.cos(phi)
@@ -70,7 +70,7 @@ class dynamics:
             
         state=x_init
         for (a_pred,d_pred,pred) in zip(a_mpc,delta_mpc, range(1,T+1)):
-            u=np.array([d_pred,a_pred])
+            u=np.array([a_pred,d_pred])
             state_new=dynamics().next_state(state,u)
             x_pred[0,i]=state_new[0]
             x_pred[1,i]=state_new[1]
@@ -89,13 +89,13 @@ class controller:
         self.control_hor=2
         
         #the input and control weights
-        self.Q=10*np.eye(self.nx) #weight on the states
-        self.R1=0.1*np.eye(self.nu) #weight on the inputs
-        self.R2=0.1*np.eye(self.nu) #weight on the input difference
+        self.Q=0.1*np.eye(self.nx) #weight on the states
+        self.R1=0.01*np.eye(self.nu) #weight on the inputs
+        self.R2=0.01*np.eye(self.nu) #weight on the input difference
         
         #The constraints
-        self.v_max=1
-        self.v_min=-1
+        self.v_max=5
+        self.v_min=-5
         self.delta_max=np.radians(30)
         self.a_max=1
         
@@ -121,7 +121,7 @@ class controller:
             A,B,C=dynamics().linearized_model(x_pred[2,t],x_pred[3,t],delta_ref)
             constraints+= [x[:, 0] == x_init]
 
-            constraints += [x[:, t + 1] == A * x[:, t] + B * u[:, t] + C]
+            constraints += [x[:, t + 1] == A @ x[:, t] + B @ u[:, t] + C]
             
             if t < (self.pred_hor - 1):
                 cost += cp.quad_form(u[:, t + 1] - u[:, t], self.R2)
@@ -176,18 +176,19 @@ dis_edge=np.transpose(discretize_edge(edge,points=11))
 x0=np.array([0.0,0.0,0.0,0.0])
 X=np.zeros((4,len(dis_edge[0])))
 X[0:2,:]=dis_edge
-X[2,:]=np.ones(len(dis_edge[0]))
-X[3,:]=np.ones(len(dis_edge[0]))
+X[2,:]=np.ones(len(dis_edge[0]))*0.1
+X[3,:]=np.ones(len(dis_edge[0]))*0.1
 delta_mpc=np.zeros(T)
 a_mpc=np.zeros(T)
 x_fin=[0]
 y_fin=[0]
+delta_ref=0.3
 
 
 for i in range(MAX_ITER):
     x_pred=dyn.prediction_model(x0,delta_mpc,a_mpc,X,T)
-    x_mpc,y_mpc,v_mpc,phi_mpc,a_mpc,delta_mpc=ctrl.mpc_controller(X, x_pred, x0, 1)
-    u=np.array([delta_mpc,a_mpc])
+    x_mpc,y_mpc,v_mpc,phi_mpc,a_mpc,delta_mpc=ctrl.mpc_controller(X, x_pred, x0, delta_ref)
+    u=np.array([a_mpc[0],delta_mpc[0]])
     state=x0
     x0=dyn.next_state(state,u)
     
@@ -196,5 +197,5 @@ for i in range(MAX_ITER):
     y_fin.append(y_mpc)
  
 plt.figure()  
-plt.plot|(X[0,:],X[1,:])
+#plt.plot(X[0,:],X[1,:])
 plt.plot(x_fin,y_fin)
