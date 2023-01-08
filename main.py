@@ -64,7 +64,7 @@ if __name__ == '__main__':
                     rrt_nodes, rrt_edges = rrt_global_planner.build_roadmap(starting_point, ending_point, intermediate_goal_check= True)
                     shortest_path_edges = rrt_global_planner.generate_shortest_path(starting_point, ending_point)
 
-                # draw the results on the graph
+                # draw the resulting graph and shortest path nodes and edges
                 environment_map.draw_path(rrt_nodes, rrt_edges, shortest_path_edges)
 
             if event.type == pygame.KEYDOWN:

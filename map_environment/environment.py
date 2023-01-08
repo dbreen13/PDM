@@ -1,10 +1,8 @@
 import pygame
 
 import numpy as np
-import tkinter as tk
 
 from contextlib import contextmanager
-from tkinter import messagebox
 
 
 class Environment:
