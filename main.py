@@ -9,21 +9,25 @@ from global_planner.rrt import RRT
 
 if __name__ == '__main__':
     # Program variables
-    v_shelf_1 = Rectangle(np.array([50, 50]), np.array([20, 200]))
-    v_shelf_2 = Rectangle(np.array([100, 50]), np.array([20, 200]))
-    v_shelf_3 = Rectangle(np.array([150, 50]), np.array([20, 200]))
-    v_shelf_4 = Rectangle(np.array([200, 50]), np.array([20, 200]))
-    v_shelf_5 = Rectangle(np.array([250, 50]), np.array([20, 200]))
-    v_shelf = (v_shelf_1, v_shelf_2, v_shelf_3, v_shelf_4, v_shelf_5)
+    v_shelf_1 = Rectangle(np.array([30, 50]), np.array([32, 200]))
+    v_shelf_2 = Rectangle(np.array([90, 50]), np.array([32, 200]))
+    v_shelf_3 = Rectangle(np.array([150, 50]), np.array([32, 200]))
+    v_shelf_4 = Rectangle(np.array([210, 50]), np.array([32, 200]))
+    v_shelf_5 = Rectangle(np.array([270, 50]), np.array([32, 200]))
+    v_shelf_6 = Rectangle(np.array([300, 290]), np.array([32, 200]))
+    v_shelf_7 = Rectangle(np.array([360, 290]), np.array([32, 200]))
+    v_shelf_8 = Rectangle(np.array([420, 290]), np.array([32, 200]))
+    v_shelf_9 = Rectangle(np.array([480, 290]), np.array([32, 200]))
+    v_shelf = (v_shelf_1, v_shelf_2, v_shelf_3, v_shelf_4, v_shelf_5, v_shelf_6, v_shelf_7, v_shelf_8, v_shelf_9)
 
-    h_shelf_1 = Rectangle(np.array([300, 50]), np.array([200, 20]))
-    h_shelf_2 = Rectangle(np.array([300, 100]), np.array([200, 20]))
-    h_shelf_3 = Rectangle(np.array([300, 150]), np.array([200, 20]))
-    h_shelf_4 = Rectangle(np.array([300, 200]), np.array([200, 20]))
-    h_shelf_5 = Rectangle(np.array([300, 250]), np.array([200, 20]))
-    h_shelf_6 = Rectangle(np.array([300, 300]), np.array([200, 20]))
-    h_shelf_7 = Rectangle(np.array([300, 350]), np.array([200, 20]))
-    h_shelf_8 = Rectangle(np.array([300, 400]), np.array([200, 20]))
+    h_shelf_1 = Rectangle(np.array([330, 50]), np.array([200, 32]))
+    h_shelf_2 = Rectangle(np.array([330, 110]), np.array([200, 32]))
+    h_shelf_3 = Rectangle(np.array([330, 170]), np.array([200, 32]))
+    h_shelf_4 = Rectangle(np.array([330, 230]), np.array([200, 32]))
+    h_shelf_5 = Rectangle(np.array([30, 280]), np.array([240, 32]))
+    h_shelf_6 = Rectangle(np.array([30, 340]), np.array([240, 32]))
+    h_shelf_7 = Rectangle(np.array([30, 400]), np.array([240, 32]))
+    h_shelf_8 = Rectangle(np.array([30, 460]), np.array([240, 32]))
 
     h_shelf = (h_shelf_1, h_shelf_2, h_shelf_3, h_shelf_4, h_shelf_5, h_shelf_6, h_shelf_7, h_shelf_8)
 
@@ -32,7 +36,7 @@ if __name__ == '__main__':
     c_space_obstacle_points = np.array([*v_shelf, *h_shelf])
 
     starting_point = np.array([20, 20])
-    car_dimensions = np.array([10, 20])
+    car_dimensions = np.array([6, 7.5])
 
     # Initiate pygame and give permission
     py.init()
