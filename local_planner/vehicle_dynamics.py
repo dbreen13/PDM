@@ -3,13 +3,13 @@ import numpy as np
 
 class VehicleDynamics:
     SAMPLING_TIME = 0.10
-    WHEEL_BASE_LENGTH = 1.0
+    WHEEL_BASE_LENGTH = 2.5
 
-    MAX_STEER_SPEED = np.deg2rad(30.0)  # maximum steering speed [rad/s]
-    MAX_STEER_ANGLE = np.deg2rad(30.0)  # maximum steering angle [rad]
-    MAX_SPEED = 2.0  # maximum speed [m/s]
+    MAX_STEER_SPEED = np.deg2rad(45.0)  # maximum steering speed [rad/s]
+    MAX_STEER_ANGLE = np.deg2rad(60.0)  # maximum steering angle [rad]
+    MAX_SPEED = 5.1  # maximum speed [m/s]
     MIN_SPEED = 0.0  # minimum speed [m/s]
-    MAX_ACCEL = 1.0  # maximum accel [m/ss]
+    MAX_ACCEL = 2.0  # maximum accel [m/ss]
 
     def __init__(self, x_pos=0.0, y_pos=0.0, yaw=0.0, velocity=0.0, sampling_time=SAMPLING_TIME):
         self.dt = sampling_time

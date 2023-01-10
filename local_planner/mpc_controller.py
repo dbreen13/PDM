@@ -9,9 +9,9 @@ class MPC:
         self.u_vec_len = 2
 
         # the input and control weights
-        self.state_weights = 10.0 * np.eye(self.x_vec_len)
-        self.input_weights = 0.01 * np.eye(self.u_vec_len)
-        self.input_difference_weights = 0.01 * np.eye(self.u_vec_len)
+        self.state_weights = np.diag([0.4, 0.9, 0.0, 0.0])
+        self.input_weights = np.diag([0.001, 0.001]) 
+        self.input_difference_weights = np.diag([0.1, 2.0]) 
 
     def update_control(self, vehicle, initial_state, reference_x, prediction_x, sampling_time):
         """ """
@@ -42,7 +42,7 @@ class MPC:
         constraints += [x[2, :] >= vehicle.MIN_SPEED]
 
         constraints += [cp.abs(u[1, :]) <= vehicle.MAX_STEER_ANGLE]
-        constraints += [cp.abs(u[0, :]) <= vehicle.MAX_ACCEL]
+        # constraints += [cp.abs(u[0, :]) <= vehicle.MAX_ ACCEL]
 
         cost += cp.quad_form(reference_x[:, self.prediction_horizon] - x[:, self.prediction_horizon],
                              self.state_weights)
