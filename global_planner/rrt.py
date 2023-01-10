@@ -219,3 +219,12 @@ class RRT:
         intermediate_nodes = start_point + np.linspace(0, 1, points)[..., np.newaxis] * (end_point - start_point)
 
         return intermediate_nodes
+
+    @staticmethod
+    def coordinates_from_shortest_path(nodes, shortest_path):
+        """ """
+        coordinates = [nodes[shortest_path[0][0]]]
+        for shortest_path_edge in shortest_path:
+            coordinates.append(nodes[shortest_path_edge[1]])
+
+        return coordinates

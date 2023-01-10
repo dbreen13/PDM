@@ -1,6 +1,6 @@
 
 import numpy as np
-import pygame
+import pygame as py
 
 from map_environment.environment import Environment
 from map_environment.obstacles import Rectangle
@@ -31,47 +31,52 @@ if __name__ == '__main__':
     c_space_dimension_boundaries = np.array([550, 550], dtype='int')
     c_space_obstacle_points = np.array([*v_shelf, *h_shelf])
 
-    starting_point = np.array([0, 0])
+    starting_point = np.array([20, 20])
+    car_dimensions = np.array([10, 20])
 
     # Initiate pygame and give permission
-    pygame.init()
+    py.init()
 
     # Create the global rrt planner
     rrt_global_planner = RRT(c_space_dimension_boundaries, c_space_obstacle_points)
 
     # Create the environment map
-    environment_map = Environment(c_space_dimension_boundaries, c_space_obstacle_points)
+    environment_map = Environment(c_space_dimension_boundaries, c_space_obstacle_points, starting_point, car_dimensions)
 
     # Change origin pygame
     # display_surface = pygame.display.get_surface()
     # display_surface.blit(pygame.transform.flip(display_surface, False, True), dest=(0, 0))
 
     # define origin for the RRT algorithm
-    pygame.draw.circle(environment_map.screen, environment_map.RGB_GREEN_CODE, starting_point, 3)
+    py.draw.circle(environment_map.screen, environment_map.RGB_GREEN_CODE, starting_point, 3)
 
     # Main loop
     running = True
     while running:
-        pygame.display.update()
 
         # Look at every event in the queue
-        for event in pygame.event.get():
+        for event in py.event.get():
 
-            if event.type == pygame.MOUSEBUTTONUP:
-                ending_point = np.array(pygame.mouse.get_pos())
+            if event.type == py.MOUSEBUTTONUP:
+                ending_point = np.array(py.mouse.get_pos())
 
                 with environment_map.in_progress():
                     rrt_nodes, rrt_edges = rrt_global_planner.build_roadmap(starting_point, ending_point, intermediate_goal_check= True)
                     shortest_path_edges = rrt_global_planner.generate_shortest_path(starting_point, ending_point)
+                    shortest_path_coordinates = rrt_global_planner.coordinates_from_shortest_path(rrt_nodes, shortest_path_edges)
 
                 # draw the resulting graph and shortest path nodes and edges
                 environment_map.draw_path(rrt_nodes, rrt_edges, shortest_path_edges)
 
-            if event.type == pygame.KEYDOWN:
+                for coordinate in shortest_path_coordinates:
+                    environment_map.draw_vehicle(coordinate[0], coordinate[1], 31.4159265)
+                    py.time.wait(1000)
+
+            if event.type == py.KEYDOWN:
                 # Was it the Escape key? If so, stop the loop.
-                if event.key == pygame.K_ESCAPE:
+                if event.key == py.K_ESCAPE:
                     running = False
 
             # Did the user click the window close button? If so, stop the loop.
-            elif event.type == pygame.QUIT:
+            elif event.type == py.QUIT:
                 running = False
