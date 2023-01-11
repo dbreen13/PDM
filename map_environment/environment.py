@@ -14,9 +14,7 @@ class Environment:
     RGB_BLUE_CODE = (0, 0, 255)
     RGB_RED_CODE = (255, 0, 0)
 
-    CAR_COLOR = (255, 0, 0)
-
-    def __init__(self, c_space_dimensions: np.array, c_space_obstacles: np.array, start_pos: np.array, car_size: np.array):
+    def __init__(self, c_space_dimensions: np.array, c_space_obstacles: np.array, car_size: np.array):
         """Base environment for the application."""
         self.c_space_dimensions = c_space_dimensions
         self.c_space_obstacles = c_space_obstacles
@@ -25,11 +23,9 @@ class Environment:
         self.screen.fill(self.RGB_WHITE_CODE)
 
         self.car = py.Surface(car_size)
-
         self.car.set_colorkey(self.RGB_WHITE_CODE)
         self.car.fill(self.RGB_RED_CODE)
 
-        self.draw_vehicle(*start_pos)
         self.draw_obstacles()
 
     def draw_obstacles(self):
@@ -53,6 +49,11 @@ class Environment:
         for shortest_path_edge in shortest_path:
             start_pos, end_pos = nodes[shortest_path_edge[0]], nodes[shortest_path_edge[1]]
             py.draw.line(self.screen, self.RGB_GREEN_CODE, start_pos, end_pos, width=2)
+
+    def draw_coordinates(self, coordinates):
+        """ """
+        for coordinate in coordinates:
+            py.draw.circle(self.screen, self.RGB_GREEN_CODE, coordinate, 4)
 
     def draw_vehicle(self, x_pos=0.0, y_pos=0.0, phi_steering_angle=0.0):
         """ """
