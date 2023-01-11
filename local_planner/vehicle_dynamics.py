@@ -7,8 +7,8 @@ class VehicleDynamics:
 
     TARGET_SPEED = 10.0
 
-    MAX_STEER_ANGLE = np.deg2rad(60.0)  # maximum steering angle [rad]
-    MAX_SPEED = 15.  # maximum speed [dm/s]
+    MAX_STEER_ANGLE = np.deg2rad(45.0)  # maximum steering angle [rad]
+    MAX_SPEED = 11.  # maximum speed [dm/s]
     MIN_SPEED = 0.0  # minimum speed [dm/s]
     MAX_ACCEL = 0.75  # maximum accel [dm/ss]
 

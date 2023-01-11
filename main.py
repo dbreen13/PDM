@@ -43,7 +43,7 @@ if __name__ == '__main__':
     # Controller variables
     mpc_horizon = 3
     max_iterations = 3
-    delta_time = 0.1
+    delta_time = 0.08
 
     control_acceleration = np.array([0.] * mpc_horizon)
     control_delta = np.array([0.] * mpc_horizon)
@@ -75,7 +75,7 @@ if __name__ == '__main__':
                 ending_point = np.array(py.mouse.get_pos())
 
                 with environment_map.in_progress():
-                    rrt_nodes, rrt_edges = rrt_global_planner.build_roadmap(starting_point, ending_point)
+                    rrt_nodes, rrt_edges = rrt_global_planner.build_roadmap(starting_point, ending_point, intermediate_goal_check=True)
                     shortest_path_edges = rrt_global_planner.generate_shortest_path(starting_point, ending_point)
 
                     shortest_path_coordinates = rrt_global_planner.coordinates_from_shortest_path(rrt_nodes, shortest_path_edges)

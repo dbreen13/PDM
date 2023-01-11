@@ -10,9 +10,9 @@ class MPC:
         self.u_vec_len = 2
 
         # the input and control weights
-        self.state_weights = np.diag([10, 10, 0.0, 0.1])
-        self.input_weights = np.diag([0.01, 0.01])
-        self.input_difference_weights = np.diag([0.1, 2.0]) 
+        self.state_weights = np.diag([12, 10, 0.0, 0.1])
+        self.input_weights = np.diag([0.1, 0.1])
+        self.input_difference_weights = np.diag([0.1, 0.5]) 
 
     def update_control(self, vehicle, initial_state, reference_x, prediction_x, sampling_time, prediction_horizon):
         """ """
