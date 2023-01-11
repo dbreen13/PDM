@@ -35,7 +35,7 @@ class RRT:
         self.nodes = np.empty((0, 2), dtype='int')
         self.edges = np.empty((0, 2), dtype='int')
 
-    def build_roadmap(self, q_init, q_goal, max_iterations=100000, intermediate_goal_check=False, update_screen=True):
+    def build_roadmap(self, q_init, q_goal, max_iterations=5000, intermediate_goal_check=False, update_screen=True):
         """ Build the rrt roadmap tree from a given start to given end configuration
         :param q_init: Starting position of the tree
         :param q_goal: Ending position for the tree
@@ -223,8 +223,14 @@ class RRT:
     @staticmethod
     def coordinates_from_shortest_path(nodes, shortest_path):
         """ """
-        coordinates = [nodes[shortest_path[0][0]]]
+        coordinates = []
         for shortest_path_edge in shortest_path:
-            coordinates.append(nodes[shortest_path_edge[1]])
+            coordinate_edge = nodes[shortest_path_edge[0]], nodes[shortest_path_edge[1]]
+            amount_of_points = int(np.linalg.norm(coordinate_edge[1] - coordinate_edge[0]) / 10)
 
-        return coordinates
+            discretize_edge = RRT.discretize_edge(coordinate_edge, points=amount_of_points)
+            discretize_edge = np.round(discretize_edge)
+
+            coordinates.extend(discretize_edge)
+
+        return np.array(coordinates)
