@@ -97,7 +97,7 @@ if __name__ == '__main__':
 
     while current_time < max_run_time:
         current_x_pos, current_y_pos = vehicle_dynamics.x_pos, vehicle_dynamics.y_pos
-        current_yaw, current_vel = vehicle_dynamics.yaw, vehicle_dynamics.velocity
+        current_yaw, current_vel = vehicle_dynamics.yaw, vehicle_dynamics.vel
 
         x_pos_history.append(current_x_pos)
         y_pos_history.append(current_y_pos)
