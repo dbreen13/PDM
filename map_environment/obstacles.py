@@ -32,3 +32,36 @@ class Rectangle:
             return True
 
         return False
+
+class Circle:
+    def __init__(self, center: np.array, size: float):
+        """Initialise an obstacle for the environment.
+        :param base_corner: lower left corner point of the obstacle.
+        :param size: xy size of the obstacle.
+        """
+        self.center = center #position of the center of the circle
+        self.size = size #radius of the circle
+
+    def boundary_points(self):
+        """Return xy boundaries of the rectangle obstacle."""
+        #x_min, x_max = self.position[0], self.position[0] + self.size[0]
+        #y_min, y_max = self.position[1], self.position[1] + self.size[1]
+
+        #return x_min, y_min, x_max, y_max
+        
+        return self.center[0], self.center[1], self.size
+
+    def is_point_in_shape_area(self, point):
+        """Check if a given point is within the boundaries of the obstacle.
+        :param point:
+            xy point to check.
+
+        :return:
+            True if the point is within the obstacle boundaries, else False.
+        """
+        x_min, x_max = self.center[0], self.center[0] + self.size[0]
+        y_min, y_max = self.center[1], self.center[1] + self.size[1]
+
+        if np.linalg.norm(point - self.center) <= self.size:
+            return True
+        return False

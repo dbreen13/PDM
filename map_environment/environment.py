@@ -16,10 +16,11 @@ class Environment:
 
     CAR_COLOR = (255, 0, 0)
 
-    def __init__(self, c_space_dimensions: np.array, c_space_obstacles: np.array, start_pos: np.array, car_size: np.array):
+    def __init__(self, c_space_dimensions: np.array, c_space_obstacles: np.array, c_space_pillars: np.array, start_pos: np.array, car_size: np.array):
         """Base environment for the application."""
         self.c_space_dimensions = c_space_dimensions
         self.c_space_obstacles = c_space_obstacles
+        self.c_space_pillars = c_space_pillars
 
         self.screen = py.display.set_mode(c_space_dimensions)
         self.screen.fill(self.RGB_WHITE_CODE)
@@ -37,6 +38,10 @@ class Environment:
         for obstacle in self.c_space_obstacles:
             obstacle_position, obstacle_size = obstacle.position, obstacle.size
             py.draw.rect(self.screen, self.RGB_BLUE_CODE, py.Rect(*obstacle_position, *obstacle_size))
+        
+        for pillar in self.c_space_pillars:
+            pillar_position, pillar_size = pillar.center, pillar.size
+            py.draw.circle(self.screen, self.RGB_BLUE_CODE, pillar_position, pillar_size)
 
         py.display.update()
 
