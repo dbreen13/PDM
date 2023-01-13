@@ -16,7 +16,7 @@ class MPC:
         self.u_vec_len = 2
 
         # the input and control weights
-        self.state_weights = np.diag([12., 10., 1., 0.1])
+        self.state_weights = np.diag([12., 10., 25, 10])
         self.input_weights = np.diag([0.1, 0.1])
         self.input_difference_weights = np.diag([0.1, 0.5]) 
 
@@ -54,7 +54,7 @@ class MPC:
             #calculate the linearized state space matrices for the current state
             mat_a, mat_b, mat_c = vehicle.linearized_model(prediction_x[2, t], prediction_x[3, t], 0.0)
             constraints += [x[:, t + 1] == mat_a @ x[:, t] + mat_b @ u[:, t] + mat_c] #add the dynamic constraints
-
+            
             if t < (prediction_horizon - 1):
                 #the cost of the change in control input
                 cost += cp.quad_form(u[:, t + 1] - u[:, t], self.input_difference_weights)

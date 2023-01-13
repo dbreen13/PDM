@@ -1,5 +1,5 @@
 import scipy
-
+import math
 import numpy as np
 import pygame as py
 import matplotlib.pyplot as plt
@@ -12,6 +12,7 @@ from local_planner.mpc_controller import MPC
 from local_planner.vehicle_dynamics import VehicleDynamics
 
 if __name__ == '__main__':
+    
     # Program variables
     v_shelf_1 = Rectangle(np.array([30, 50]), np.array([16, 200]))
     v_shelf_2 = Rectangle(np.array([70, 50]), np.array([16, 200]))
@@ -138,6 +139,7 @@ if __name__ == '__main__':
     vel_history = []
     time_stamps = []
 
+
     # Create the local planner
     controller = MPC()
     vehicle_dynamics = VehicleDynamics(sampling_time=delta_time)
@@ -153,6 +155,7 @@ if __name__ == '__main__':
 
     # Main loop
     running = True
+    
     while running:
         py.display.update()
 
@@ -219,7 +222,6 @@ if __name__ == '__main__':
 
                 x_mpc, y_mpc, vel_mpc, phi_mpc, control_acceleration, control_delta = \
                     controller.update_control(vehicle_dynamics, initial_x, next_references, prediction_x, delta_time, mpc_horizon)
-
                 poa, pod = control_acceleration[:], control_delta[:]
                 du = sum(abs(control_acceleration - poa)) + sum(abs(control_delta - pod))
 
@@ -245,3 +247,12 @@ if __name__ == '__main__':
     ax3.set_title('Vehicle velocity')
 
     plt.show()
+
+    pos_history=np.array([x_pos_history, y_pos_history])
+    ref_history=reference_x[0:2,:].T
+    value=[]
+    for ref in ref_history:
+        distances = np.array([np.linalg.norm(ref - pos) for pos in pos_history.T]) 
+        value.append(np.min(distances))
+    plt.plot(value)
+    plt.plot(np.ones(len(value))*9)

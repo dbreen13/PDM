@@ -8,7 +8,7 @@ class VehicleDynamics:
     SAMPLING_TIME = 0.10
     WHEEL_BASE_LENGTH = 7.5 #length of the wheelbase [dm]
 
-    TARGET_SPEED = 10.0 #target speed [dm/s]
+    TARGET_SPEED = 8.0 #target speed [dm/s]
 
     MAX_STEER_ANGLE = np.deg2rad(45.0)  # maximum steering angle [rad]
     MAX_STEER_ANGLE_SPEED = np.deg2rad(30.0)  # maximum steering angle [rad/s]
