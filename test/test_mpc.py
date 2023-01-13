@@ -121,12 +121,13 @@ if __name__ == '__main__':
         
         if closest_point_idx>=(len(distances)-6):
             break
+
         next_references = reference_x[:, closest_point_idx:closest_point_idx + mpc_horizon+1]
         
         for i in range(max_iterations):
             prediction_x = vehicle_dynamics.prediction_motion(control_acceleration, control_delta,next_references  , mpc_horizon)
             x_mpc, y_mpc, vel_mpc, phi_mpc, control_acceleration, control_delta = \
-                mpc_controller.update_control(vehicle_dynamics, initial_x, next_references, prediction_x, delta_time)
+                mpc_controller.update_control(vehicle_dynamics, initial_x, next_references, prediction_x, delta_time, mpc_horizon)
 
             poa, pod = control_acceleration[:], control_delta[:]
             du = sum(abs(control_acceleration - poa)) + sum(abs(control_delta - pod))  # calc u change value
