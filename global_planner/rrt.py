@@ -1,5 +1,5 @@
 import numpy as np
-import pygame
+import pygame as py
 
 class FailedBuildingRoadmap(Exception):
     """Base class to generate custom exception if building of roadmap failed."""
@@ -24,22 +24,25 @@ class FailedToGeneratePath(Exception):
 class RRT:
     """Base class to generate a global path using the rrt algorithm"""
 
-    def __init__(self, c_space_dimensions: np.array, c_space_obstacles: np.array):
+    MAX_ITERATIONS = 10000
+
+    def __init__(self, c_space_dimensions: np.array, c_space_obstacles: np.array, c_space_pillars: np.array):
         """ Create a rrt object which can be used to generate paths in a given configuration space
         :param c_space_dimensions: The outer boundaries of the configuration space
         :param c_space_obstacles: Array of the obstacle contours in the configuration space
         """
         self.c_space_dimensions = c_space_dimensions
         self.c_space_obstacles = c_space_obstacles
+        self.c_space_pillars = c_space_pillars
 
         self.nodes = np.empty((0, 2), dtype='int')
         self.edges = np.empty((0, 2), dtype='int')
 
-    def build_roadmap(self, q_init, q_goal, max_iterations=5000, intermediate_goal_check=False, update_screen=True):
+    def build_roadmap(self, q_init, q_goal, rewire=False, intermediate_goal_check=False, update_screen=True):
         """ Build the rrt roadmap tree from a given start to given end configuration
         :param q_init: Starting position of the tree
         :param q_goal: Ending position for the tree
-        :param max_iterations: Max number of expansions
+        :param rewire: extend algorithm to rrt star by rewiring at the end
         :param intermediate_goal_check: Check between random samples if goal is reachable
         :param update_screen: Update the pygame screen between iterations
 
@@ -58,7 +61,7 @@ class RRT:
         # add starting point to nodes
         self.nodes = np.vstack((self.nodes, q_init))
 
-        for iteration in range(max_iterations):
+        for iteration in range(self.MAX_ITERATIONS):
             new_node = self.generate_random_node()
 
             if new_node.tolist() in self.nodes.tolist():
@@ -93,11 +96,10 @@ class RRT:
 
                 new_edge_indices = np.array([closest_node_idx, created_node_idx])
                 self.edges = np.vstack((self.edges, new_edge_indices))
-
                 break
 
             if update_screen:
-                pygame.display.update()
+                py.display.update()
 
         if q_goal.tolist() not in self.nodes.tolist():
             if not self.is_goal_reachable(q_goal):
@@ -112,7 +114,64 @@ class RRT:
             new_edge_indices = np.array([closest_node_idx, created_node_idx])
             self.edges = np.vstack((self.edges, new_edge_indices))
 
+        if rewire:
+            print(f'LOGGER: Done building roadmap, start rewiring path...')
+            self.rewire_nodes(update_screen)
+
         return self.nodes, self.edges
+
+    def rewire_nodes(self, update_screen):
+        """ according to prims algorithm"""
+        adjacency_matrix = self.generate_adjacency_matrix_of_nodes()
+        selected_node = np.array([False] * adjacency_matrix.shape[0])
+
+        new_edges = np.empty((0, 2), dtype='int')
+        amount_of_nodes = adjacency_matrix.shape[0]
+
+        selected_node[0] = True
+        while new_edges.shape[0] < amount_of_nodes - 1:
+            optimal_row_node = 0
+            optimal_col_node = 0
+
+            minimum = 9e2
+            for row_node in range(amount_of_nodes):
+                if selected_node[row_node]:
+                    for col_node in range(amount_of_nodes):
+                        if not selected_node[col_node] and adjacency_matrix[row_node][col_node]:
+
+                            if minimum > adjacency_matrix[row_node][col_node]:
+                                minimum = adjacency_matrix[row_node][col_node]
+                                optimal_row_node = row_node
+                                optimal_col_node = col_node
+
+                        if update_screen:
+                            py.display.update()
+
+            new_edge_indices = np.array([optimal_row_node, optimal_col_node])
+            new_edges = np.vstack((new_edges, new_edge_indices))
+
+            selected_node[optimal_col_node] = True
+        self.edges = new_edges
+
+    def generate_adjacency_matrix_of_nodes(self):
+        """ """
+        adjacency_matrix = []
+
+        for selected_node in self.nodes:
+            adjacency_list =  np.array([0.] * len(self.nodes))
+
+            for node_idx, node in enumerate(self.nodes):
+                if np.array_equal(selected_node, node):
+                    continue
+
+                new_edge = np.array([selected_node, node])
+                if self.is_edge_in_obstacle_space(new_edge):
+                    continue
+
+                adjacency_list[node_idx] = int(np.linalg.norm(selected_node - node))
+            adjacency_matrix.append(adjacency_list)
+
+        return np.array(adjacency_matrix)
 
     def generate_shortest_path(self, q_init, q_goal):
         """Find the shortest rrt path in the created roadmap.
@@ -174,6 +233,9 @@ class RRT:
             if any(obstacle.is_point_in_shape_area(intermediate_node) for obstacle in self.c_space_obstacles):
                 return True
 
+            if any(obstacle.is_point_in_shape_area(intermediate_node) for obstacle in self.c_space_pillars):
+                return True
+
         return False
 
     def is_goal_reachable(self, q_goal):
@@ -198,8 +260,10 @@ class RRT:
         :param current_node:
             The node to check against the list of nodes.
         :param all_nodes:
+            All the available nodes
 
         :return:
+            value of the node closest to the current node
         """
         idx_to_closest_node = np.argmin([np.linalg.norm(current_node - node) for node in all_nodes])
         return all_nodes[idx_to_closest_node]

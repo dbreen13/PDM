@@ -7,20 +7,26 @@ from map_environment.obstacles import Rectangle
 from global_planner.rrt import RRT
 
 if __name__ == '__main__':
-    shelf_1 = Rectangle(np.array([50, 50]), np.array([20, 200]))
-    shelf_2 = Rectangle(np.array([100, 50]), np.array([20, 200]))
-    shelf_3 = Rectangle(np.array([150, 50]), np.array([20, 200]))
-    shelf_4 = Rectangle(np.array([200, 50]), np.array([20, 200]))
-    shelf_5 = Rectangle(np.array([250, 50]), np.array([20, 200]))
+    shelf_1 = Rectangle(np.array([50, 50]), np.array([20, 400]))
+    shelf_2 = Rectangle(np.array([100, 50]), np.array([20, 400]))
+    shelf_3 = Rectangle(np.array([150, 50]), np.array([20, 400]))
+    shelf_4 = Rectangle(np.array([200, 50]), np.array([20, 400]))
+    shelf_5 = Rectangle(np.array([250, 50]), np.array([20, 400]))
+
+    shelf_6 = Rectangle(np.array([300, 50]), np.array([175, 30]))
+    shelf_7 = Rectangle(np.array([300, 100]), np.array([175, 30]))
+    shelf_8 = Rectangle(np.array([300, 150]), np.array([175, 30]))
+    shelf_9 = Rectangle(np.array([300, 200]), np.array([175, 30]))
+    shelf_10 = Rectangle(np.array([300, 250]), np.array([175, 30]))
 
     c_space_dimension_boundaries = np.array([500, 500], dtype='int')
-    c_space_obstacle_points = np.array([shelf_1, shelf_2, shelf_3, shelf_4, shelf_5])
+    c_space_obstacle_points = np.array([shelf_1, shelf_2, shelf_3, shelf_4, shelf_5, shelf_6, shelf_7, shelf_8, shelf_9, shelf_10])
 
     starting_point = np.array([0, 0], dtype='int')
-    ending_point = np.array([175, 375], dtype='int')
+    ending_point = np.array([300, 300], dtype='int')
 
     rrt_global_planner = RRT(c_space_dimension_boundaries, c_space_obstacle_points)
-    rrt_nodes, rrt_edges = rrt_global_planner.build_roadmap(starting_point, ending_point, intermediate_goal_check=True)
+    rrt_nodes, rrt_edges = rrt_global_planner.build_roadmap(starting_point, ending_point, rewire=True, intermediate_goal_check=True, update_screen=False)
     shortest_path_edges = rrt_global_planner.generate_shortest_path(starting_point, ending_point)
 
     # plot the beginning and ending point
