@@ -16,7 +16,7 @@ class MPC:
         self.u_vec_len = 2
 
         # the input and control weights
-        self.state_weights = np.diag([12, 10, 0.0, 0.1])
+        self.state_weights = np.diag([12., 10., 1., 0.1])
         self.input_weights = np.diag([0.1, 0.1])
         self.input_difference_weights = np.diag([0.1, 0.5]) 
 
@@ -59,7 +59,7 @@ class MPC:
                 #the cost of the change in control input
                 cost += cp.quad_form(u[:, t + 1] - u[:, t], self.input_difference_weights)
                 #the constraint on the change in control input
-                constraints += [cp.abs(u[1, t + 1] - u[1, t]) <= vehicle.MAX_STEER_ANGLE * sampling_time]
+                constraints += [cp.abs(u[1, t + 1] - u[1, t]) <= vehicle.MAX_STEER_ANGLE_SPEED * sampling_time]
 
         # constant state and input constraints
         constraints += [x[2, :] <= vehicle.MAX_SPEED]

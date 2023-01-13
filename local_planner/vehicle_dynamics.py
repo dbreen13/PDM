@@ -11,6 +11,8 @@ class VehicleDynamics:
     TARGET_SPEED = 10.0 #target speed [dm/s]
 
     MAX_STEER_ANGLE = np.deg2rad(45.0)  # maximum steering angle [rad]
+    MAX_STEER_ANGLE_SPEED = np.deg2rad(30.0)  # maximum steering angle [rad/s]
+
     MAX_SPEED = 11.  # maximum speed [dm/s]
     MIN_SPEED = 0.0  # minimum speed [dm/s]
     MAX_ACCEL = 0.75  # maximum accel [dm/ss]
@@ -129,7 +131,7 @@ class VehicleDynamics:
         
         #check full rank controllability 
         ctrl_mat=ctrl.ctrb(self.A,self.B)
-        rank_AB=4-np.linalg.matrix_rank(ctrl_mat)
+        rank_AB = 4 - np.linalg.matrix_rank(ctrl_mat)
             
         return self.A, self.B, self.C
 
