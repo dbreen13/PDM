@@ -104,14 +104,21 @@ class MPC:
             x_prev, y_prev = reference_x_pos[pos_idx - 1], reference_y_pos[pos_idx - 1]
             x, y = reference_x_pos[pos_idx], reference_y_pos[pos_idx]
 
-            reference_yaw_coordinate = 0.
-            if int(x * y)  > 0:
-                if x_prev < x:
-                    reference_yaw_coordinate = math.atan(y/x)
-                if x < x_prev:
-                    reference_yaw_coordinate += np.deg2rad(90.0)
-                if y < y_prev:
-                    reference_yaw_coordinate = -reference_yaw_coordinate
+            x_diff = x - x_prev
+            y_diff = y - y_prev
+
+            if (x_diff == 0.) and (0. <= y_diff):
+                reference_yaw_coordinate = np.deg2rad(90)
+            elif (x_diff == 0.) and ( y_diff <= 0.):
+                reference_yaw_coordinate = - np.deg2rad(90)
+            else:
+                reference_yaw_coordinate = math.atan(y_diff/x_diff)
+
+            if (x_diff <= 0.) and (0. <= y_diff):
+                reference_yaw_coordinate = reference_yaw_coordinate
+
+            if (x_diff <= 0.) and (y_diff <= 0.):
+                reference_yaw_coordinate = reference_yaw_coordinate
 
             reference_yaw.append(reference_yaw_coordinate)
 
@@ -120,7 +127,7 @@ class MPC:
     @staticmethod
     def get_closest_point_index(reference_x, current_x):
         """ Find the closest reference location to the current location
-        :param referece_x: the current array of reference states for the mpc controller        
+        :param reference_x: the current array of reference states for the mpc controller
         :param current_x: the current states
         """
         current_coordinate = np.array([current_x[0], current_x[1]])
