@@ -115,7 +115,7 @@ class RRT:
             self.edges = np.vstack((self.edges, new_edge_indices))
 
         if rewire:
-            print(f'LOGGER: Done building roadmap, start rewiring path...')
+            print(f'LOGGER: Done building roadmap, nodes: {self.nodes.shape[0]} , start rewiring path...')
             self.rewire_nodes(update_screen)
 
         return self.nodes, self.edges
@@ -144,8 +144,8 @@ class RRT:
                                 optimal_row_node = row_node
                                 optimal_col_node = col_node
 
-                        if update_screen:
-                            py.display.update()
+                    if update_screen:
+                        py.display.update()
 
             new_edge_indices = np.array([optimal_row_node, optimal_col_node])
             new_edges = np.vstack((new_edges, new_edge_indices))
