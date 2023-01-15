@@ -1,14 +1,15 @@
 import numpy as np
 import control as ctrl
 
+
 class VehicleDynamics:
     """Base class in which the vehicle dynamics are defined"""
-    
-    #variables used 
-    SAMPLING_TIME = 0.10
-    WHEEL_BASE_LENGTH = 7.5 #length of the wheelbase [dm]
 
-    TARGET_SPEED = 8.0 #target speed [dm/s]
+    # variables used
+    SAMPLING_TIME = 0.10
+    WHEEL_BASE_LENGTH = 7.5  # length of the wheelbase [dm]
+
+    TARGET_SPEED = 8.0  # target speed [dm/s]
 
     MAX_STEER_ANGLE = np.deg2rad(45.0)  # maximum steering angle [rad]
     MAX_STEER_ANGLE_SPEED = np.deg2rad(30.0)  # maximum steering angle [rad/s]
@@ -70,8 +71,8 @@ class VehicleDynamics:
         self.y_pos += (self.vel * np.sin(self.yaw)) * self.dt
         self.vel += acceleration * self.dt
 
-        self.yaw += self.vel / self.WHEEL_BASE_LENGTH * np.tan(steering_angle_delta) * self.dt
-        self.yaw = self.normalize_angle(self.yaw)
+        new_yaw = self.yaw + (self.vel / self.WHEEL_BASE_LENGTH * np.tan(steering_angle_delta) * self.dt)
+        self.yaw = self.optimize_angle(self.yaw, new_yaw)
 
     def prediction_motion(self, ctrl_acc, ctrl_delta, reference_x, mpc_horizon):
         """Predict the next states over the prediciton horizon
@@ -128,20 +129,23 @@ class VehicleDynamics:
         self.C[0] = self.dt * velocity * np.sin(yaw) * yaw
         self.C[1] = - self.dt * velocity * np.cos(yaw) * yaw
         self.C[3] = - self.dt * velocity * steering_angle / (self.WHEEL_BASE_LENGTH * np.cos(steering_angle) ** 2)
-        
-        #check full rank controllability 
-        ctrl_mat=ctrl.ctrb(self.A,self.B)
+
+        # check full rank controllability
+        ctrl_mat = ctrl.ctrb(self.A, self.B)
         rank_AB = 4 - np.linalg.matrix_rank(ctrl_mat)
-            
+
         return self.A, self.B, self.C
 
     @staticmethod
-    def normalize_angle(angle):
-        """ Normalize an angle to [-pi, pi]."""
-        while angle > np.pi:
-            angle -= 2.0 * np.pi
+    def optimize_angle(previous_angle, new_angle):
+        """ Smoothen the angle to [-pi, pi]."""
+        smooth_angle = new_angle
 
-        while angle < -np.pi:
-            angle += 2.0 * np.pi
+        angle_diff = new_angle - previous_angle
+        while angle_diff >= np.pi / 2.0:
+            smooth_angle -= 2.0 * np.pi
 
-        return angle
+        while angle_diff <= -np.pi / 2.0:
+            smooth_angle += 2.0 * np.pi
+
+        return smooth_angle
