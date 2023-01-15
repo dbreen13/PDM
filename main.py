@@ -123,7 +123,7 @@ if __name__ == '__main__':
 
     # Controller variables
     max_iterations = 3
-    mpc_horizon = 3
+    mpc_horizon = 2
     delta_time = 0.1
     current_time = 0.
 
@@ -138,7 +138,6 @@ if __name__ == '__main__':
     yaw_history = []
     vel_history = []
     time_stamps = []
-
 
     # Create the local planner
     controller = MPC()
@@ -168,7 +167,7 @@ if __name__ == '__main__':
                 if not rrt_global_planner.is_node_in_obstacle_space(ending_point):
                     print(f'LOGGER: Valid endpoint given {ending_point}, start building roadmap...')
                     with environment_map.in_progress():
-                        rrt_nodes, rrt_edges = rrt_global_planner.build_roadmap(starting_point, ending_point, rewire=False, intermediate_goal_check=True)
+                        rrt_nodes, rrt_edges = rrt_global_planner.build_roadmap(starting_point, ending_point, rewire=True, intermediate_goal_check=True)
                         print(f'LOGGER: Done building roadmap, start calculating shortest path...')
 
                         shortest_path_edges = rrt_global_planner.generate_shortest_path(starting_point, ending_point)
@@ -213,7 +212,7 @@ if __name__ == '__main__':
                 mpc_horizon = reference_x.shape[1] - closest_reference_point_idx - 1
 
             if mpc_horizon == 0:
-                py.time.wait(3000)
+                py.time.wait(1000)
                 break
 
             next_references = reference_x[:, closest_reference_point_idx:closest_reference_point_idx + mpc_horizon + 1]
@@ -235,24 +234,45 @@ if __name__ == '__main__':
 
             current_time += delta_time
 
-    ax1 = plt.subplot(212)
-    ax1.plot(x_pos_history, y_pos_history)
-
-    ax2 = plt.subplot(221)
-    ax2.plot(time_stamps, yaw_history)
-    ax2.set_title('Vehicle yaw')
-
-    ax3 = plt.subplot(222)
-    ax3.plot(time_stamps, vel_history)
-    ax3.set_title('Vehicle velocity')
-
-    plt.show()
-
     pos_history=np.array([x_pos_history, y_pos_history])
     ref_history=reference_x[0:2,:].T
-    value=[]
+
+    new_y_pos_history = []
+    new_x_pos_history = []
+    new_yaw_history = []
+    new_vel_history = []
+    new_time_stamps = []
+
     for ref in ref_history:
-        distances = np.array([np.linalg.norm(ref - pos) for pos in pos_history.T]) 
-        value.append(np.min(distances))
-    plt.plot(value)
-    plt.plot(np.ones(len(value))*9)
+        distances = np.array([np.linalg.norm(ref - pos) for pos in pos_history.T])
+        index_closest_value = np.argmin(distances)
+
+        new_y_pos_history.append(y_pos_history[index_closest_value])
+        new_x_pos_history.append(x_pos_history[index_closest_value])
+        new_yaw_history.append(yaw_history[index_closest_value])
+        new_vel_history.append(vel_history[index_closest_value])
+        new_time_stamps.append(time_stamps[index_closest_value])
+
+    fig, axs = plt.subplots(2, 2)
+
+    axs[0, 0].set_title('X pos')
+    axs[0, 0].plot(new_time_stamps, new_x_pos_history, label='History')
+    axs[0, 0].plot(new_time_stamps, reference_x[0,:], label='Reference')
+    axs[0, 0].legend(loc="upper left")
+
+    axs[0, 1].set_title('Y pos')
+    axs[0, 1].plot(new_time_stamps, new_y_pos_history, label='History')
+    axs[0, 1].plot(new_time_stamps, reference_x[1,:], label='Reference')
+    axs[0, 1].legend(loc="upper left")
+
+    axs[1, 0].set_title('Vehicle velocity')
+    axs[1, 0].plot(new_time_stamps, new_vel_history, label='History')
+    axs[1, 0].plot(new_time_stamps, reference_x[2, :], label='Reference')
+    axs[1, 0].legend(loc="upper left")
+
+    axs[1, 1].set_title('Vehicle yaw')
+    axs[1, 1].plot(new_time_stamps, new_yaw_history, label='History')
+    axs[1, 1].plot(new_time_stamps, reference_x[3, :], label='Reference')
+    axs[1, 1].legend(loc="upper left")
+
+    plt.show()
