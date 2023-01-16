@@ -263,25 +263,34 @@ if __name__ == '__main__':
             new_time_stamps.append(time_stamps[index_closest_value])
 
         fig, axs = plt.subplots(2, 2)
+        fig.tight_layout()
 
         axs[0, 0].set_title('X pos')
         axs[0, 0].plot(new_time_stamps, new_x_pos_history, label='History')
         axs[0, 0].plot(new_time_stamps, reference_x[0,:], label='Reference')
         axs[0, 0].legend(loc="upper left")
+        axs[0, 0].set_xlabel('Timestamps [sec]')
+        axs[0, 0].set_ylabel('Position [dm]')
 
         axs[0, 1].set_title('Y pos')
         axs[0, 1].plot(new_time_stamps, new_y_pos_history, label='History')
         axs[0, 1].plot(new_time_stamps, reference_x[1,:], label='Reference')
         axs[0, 1].legend(loc="upper left")
+        axs[0, 1].set_xlabel('Timestamps [sec]')
+        axs[0, 1].set_ylabel('Position [dm]')
 
         axs[1, 0].set_title('Vehicle velocity')
         axs[1, 0].plot(new_time_stamps, new_vel_history, label='History')
         axs[1, 0].plot(new_time_stamps, reference_x[2, :], label='Reference')
         axs[1, 0].legend(loc="upper left")
+        axs[1, 0].set_xlabel('Timestamps [sec]')
+        axs[1, 0].set_ylabel('Velocity [dm/s]')
 
         axs[1, 1].set_title('Vehicle yaw')
         axs[1, 1].plot(new_time_stamps, new_yaw_history, label='History')
         axs[1, 1].plot(new_time_stamps, reference_x[3, :], label='Reference')
         axs[1, 1].legend(loc="upper left")
+        axs[1, 1].set_xlabel('Timestamps [sec]')
+        axs[1, 1].set_ylabel('Angle [rad]')
 
         plt.show()
