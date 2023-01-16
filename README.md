@@ -41,7 +41,7 @@ A brief description of the content of every package (and folder).
 The global planner is responsible for creating waypoints from a given initial point (0, 0) to an ending point given by the user. Using RRT the algorithm samples coordinates in the configuration space and builds a tree in which a path to the goal can be constructed. There is an additional optimization rewiring option, which redefines the edges of RRT to be optimal to the defined node (using Prim's algorithm). Another optimization is the intermediate goal check, which after every valid sample checks if the end goal can be reached with the current set of nodes.
 
 #### Local planner
-The local planner is responsible for following the track with the constraints of the vehicle and environment. Using MPC with a defined set of constraints, weights, states and cost the algorithm solves for a 'optimal' control vector which can be passed to the vehicle to update the state.
+The local planner is responsible for following the track with the constraints of the vehicle and environment. Using the cvx solver with a defined set of constraints, weights, states and cost the algorithm solves for a 'optimal' control vector which can be passed to the vehicle to update the state.
 
 #### Environment
 The environment creates and updates a simulated environment based on _pygame_.  It enables the option to draw obstacles coordinates and the progression of the car throughout the simulation.
