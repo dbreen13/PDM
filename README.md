@@ -72,6 +72,9 @@ There are a few known bugs to the current code implementation.
 ------------------------------
 The _res_, short for resource, folder has some images which are displayed below to give a short impression on the result of running the solution.
 
+### Example simulation
+[video_simulation_example.mp4](res/video_simulation_example.mp4)
+
 ### Example of a run in simulation
 ![alt text](res/img_path_run_1.jpg)
 
@@ -83,3 +86,4 @@ The _res_, short for resource, folder has some images which are displayed below 
 
 ### Example of dense RRT graph in simulation
 ![alt text](res/img_rrt_graph.jpg)
+
