@@ -152,7 +152,7 @@ if __name__ == '__main__':
 
     # Main loop
     running = True
-    use_debug = True
+    use_debug = False
 
     while running:
         py.display.update()
@@ -212,32 +212,34 @@ if __name__ == '__main__':
             if reference_x.shape[1] - closest_reference_point_idx == mpc_horizon:
                 mpc_horizon = reference_x.shape[1] - closest_reference_point_idx - 1
 
-            if mpc_horizon <= 0:
+            if 0 < mpc_horizon:
+                next_references = reference_x[:, closest_reference_point_idx:closest_reference_point_idx + mpc_horizon + 1]
+                for i in range(max_iterations):
+                    prediction_x = vehicle_dynamics.prediction_motion(control_acceleration, control_delta, next_references, mpc_horizon)
+
+                    x_mpc, y_mpc, vel_mpc, phi_mpc, control_acceleration, control_delta = \
+                        controller.update_control(vehicle_dynamics, initial_x, next_references, prediction_x, delta_time, mpc_horizon)
+                    poa, pod = control_acceleration[:], control_delta[:]
+                    du = sum(abs(control_acceleration - poa)) + sum(abs(control_delta - pod))
+
+                    if du <= 0.1:
+                        control_vector = np.array([control_acceleration[0], control_delta[0]])
+                        vehicle_dynamics.update_state(control_vector)
+                        break
+
+                previous_closest_reference_point_idx = closest_reference_point_idx
+                py.draw.circle(environment_map.screen, environment_map.RGB_BLUE_CODE, [vehicle_dynamics.x_pos, vehicle_dynamics.y_pos], 3)
+
+                current_time += delta_time
+            else:
+                # endpoint is reached
+                py.time.wait(5000)
+
                 shortest_path_coordinates = None
                 vehicle_dynamics.reset_state()
 
-                py.time.wait(5000)
-                if use_debug:
-                    break
+                break
 
-            next_references = reference_x[:, closest_reference_point_idx:closest_reference_point_idx + mpc_horizon + 1]
-            for i in range(max_iterations):
-                prediction_x = vehicle_dynamics.prediction_motion(control_acceleration, control_delta, next_references, mpc_horizon)
-
-                x_mpc, y_mpc, vel_mpc, phi_mpc, control_acceleration, control_delta = \
-                    controller.update_control(vehicle_dynamics, initial_x, next_references, prediction_x, delta_time, mpc_horizon)
-                poa, pod = control_acceleration[:], control_delta[:]
-                du = sum(abs(control_acceleration - poa)) + sum(abs(control_delta - pod))
-
-                if du <= 0.1:
-                    control_vector = np.array([control_acceleration[0], control_delta[0]])
-                    vehicle_dynamics.update_state(control_vector)
-                    break
-
-            previous_closest_reference_point_idx = closest_reference_point_idx
-            py.draw.circle(environment_map.screen, environment_map.RGB_BLUE_CODE, [vehicle_dynamics.x_pos, vehicle_dynamics.y_pos], 3)
-
-            current_time += delta_time
 
     # stop the pygame simulation
     py.quit()
