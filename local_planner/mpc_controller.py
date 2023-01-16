@@ -5,26 +5,20 @@ import numpy as np
 
 class MPC:
     def __init__(self):
-        """Initialize the variables of the mpc_controller
-        :param x_vec_len: the number of states of the system
-        :param u_vec_len: the number of control inputs of the system
-        :param state_weights: the weight matrix on the states
-        :param input_weights: the weight matrix on the control inputs
-        :param input_difference_weights: the weight matrix on the difference between the control input and the previous control input
-        """
-        self.x_vec_len = 4
-        self.u_vec_len = 2
+        """Initialize the variables of the mpc_controller."""
+        self.x_vec_len = 4 # the number of states of the system
+        self.u_vec_len = 2 # the number of control inputs of the system
 
         # the input and control weights
-        self.state_weights = np.diag([12., 10., 25, 10])
-        self.input_weights = np.diag([0.1, 0.1])
-        self.input_difference_weights = np.diag([0.1, 0.5]) 
+        self.state_weights = np.diag([12., 10., 25, 10]) # the weight matrix on the states
+        self.input_weights = np.diag([0.1, 0.1]) # the weight matrix on the control inputs
+        self.input_difference_weights = np.diag([0.1, 0.5]) # the weight matrix on the difference between the control input and the previous control input
 
     def update_control(self, vehicle, initial_state, reference_x, prediction_x, sampling_time, prediction_horizon):
-        """Define the optimzation problem of the MPC controller and solve the optimaztion problem using cvx
+        """Define the optimzation problem of the MPC controller and solve the optimization problem using cvx
         :param vehicle: contains the vehicle dynamics variables
         :param initial_state:the initial state of the mobile robot
-        :param referece_x: the current array of reference states for the mpc controller
+        :param reference_x: the current array of reference states for the mpc controller
         :param prediction_x: the predicted states over the prediction horizon
         :param sampling_time: the sampling time of the discrete time system
         :param prediction_horizon: the prediction horizon of the mpc_controller
@@ -104,23 +98,12 @@ class MPC:
             x_prev, y_prev = reference_x_pos[pos_idx - 1], reference_y_pos[pos_idx - 1]
             x, y = reference_x_pos[pos_idx], reference_y_pos[pos_idx]
 
-            x_diff = x - x_prev
-            y_diff = y - y_prev
-
-            if (x_diff == 0.) and (0. <= y_diff):
-                reference_yaw_coordinate = np.deg2rad(90)
-            elif (x_diff == 0.) and ( y_diff <= 0.):
-                reference_yaw_coordinate = - np.deg2rad(90)
+            if (y - y_prev) == 0. and (x - x_prev) == 0.:
+                new_reference_yaw = reference_yaw[-1]
             else:
-                reference_yaw_coordinate = math.atan(y_diff/x_diff)
+                new_reference_yaw = MPC.normalize_angle(math.atan2(y-y_prev, x-x_prev))
 
-            if (x_diff <= 0.) and (0. <= y_diff):
-                reference_yaw_coordinate = reference_yaw_coordinate
-
-            if (x_diff <= 0.) and (y_diff <= 0.):
-                reference_yaw_coordinate = reference_yaw_coordinate
-
-            reference_yaw.append(reference_yaw_coordinate)
+            reference_yaw.append(new_reference_yaw)
 
         return np.array([reference_x_pos, reference_y_pos, reference_vel, reference_yaw])
 
@@ -135,3 +118,20 @@ class MPC:
 
         distances = np.array([np.linalg.norm(coordinate - current_coordinate) for coordinate in all_coordinates])
         return np.argmin(distances)
+
+    @staticmethod
+    def normalize_angle(angle):
+        """Normalize a give angle to the range [-pi, pi].
+        :param angle:
+            Given angle to normalize
+
+        :returns
+            The normalized angle.
+        """
+        while angle > math.pi:
+            angle = angle - 2.0 * math.pi
+
+        while angle < -math.pi:
+            angle = angle + 2.0 * math.pi
+
+        return angle

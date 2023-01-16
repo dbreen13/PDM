@@ -1,5 +1,3 @@
-import scipy
-import math
 import numpy as np
 import pygame as py
 import matplotlib.pyplot as plt
@@ -154,7 +152,8 @@ if __name__ == '__main__':
 
     # Main loop
     running = True
-    
+    use_debug = True
+
     while running:
         py.display.update()
 
@@ -162,6 +161,7 @@ if __name__ == '__main__':
         for event in py.event.get():
 
             if event.type == py.MOUSEBUTTONUP:
+                environment_map.draw_margins = use_debug
                 ending_point = np.array(py.mouse.get_pos())
 
                 if not rrt_global_planner.is_node_in_obstacle_space(ending_point):
@@ -177,7 +177,8 @@ if __name__ == '__main__':
                         reference_x = controller.reference_states(vehicle_dynamics, shortest_path_coordinates)
 
                     # draw the resulting graph and shortest path nodes and edges
-                    environment_map.draw_path(rrt_nodes, rrt_edges, shortest_path_edges)
+                    if use_debug:
+                        environment_map.draw_path(rrt_nodes, rrt_edges, shortest_path_edges)
 
                     # draw coordinates
                     environment_map.draw_coordinates(shortest_path_coordinates)
@@ -211,9 +212,13 @@ if __name__ == '__main__':
             if reference_x.shape[1] - closest_reference_point_idx == mpc_horizon:
                 mpc_horizon = reference_x.shape[1] - closest_reference_point_idx - 1
 
-            if mpc_horizon == 0:
-                py.time.wait(1000)
-                break
+            if mpc_horizon <= 0:
+                shortest_path_coordinates = None
+                vehicle_dynamics.reset_state()
+
+                py.time.wait(5000)
+                if use_debug:
+                    break
 
             next_references = reference_x[:, closest_reference_point_idx:closest_reference_point_idx + mpc_horizon + 1]
             for i in range(max_iterations):
@@ -234,45 +239,49 @@ if __name__ == '__main__':
 
             current_time += delta_time
 
-    pos_history=np.array([x_pos_history, y_pos_history])
-    ref_history=reference_x[0:2,:].T
+    # stop the pygame simulation
+    py.quit()
 
-    new_y_pos_history = []
-    new_x_pos_history = []
-    new_yaw_history = []
-    new_vel_history = []
-    new_time_stamps = []
+    if use_debug:
+        pos_history = np.array([x_pos_history, y_pos_history])
+        ref_history = reference_x[0:2, :].T
 
-    for ref in ref_history:
-        distances = np.array([np.linalg.norm(ref - pos) for pos in pos_history.T])
-        index_closest_value = np.argmin(distances)
+        new_y_pos_history = []
+        new_x_pos_history = []
+        new_yaw_history = []
+        new_vel_history = []
+        new_time_stamps = []
 
-        new_y_pos_history.append(y_pos_history[index_closest_value])
-        new_x_pos_history.append(x_pos_history[index_closest_value])
-        new_yaw_history.append(yaw_history[index_closest_value])
-        new_vel_history.append(vel_history[index_closest_value])
-        new_time_stamps.append(time_stamps[index_closest_value])
+        for ref in ref_history:
+            distances = np.array([np.linalg.norm(ref - pos) for pos in pos_history.T])
+            index_closest_value = np.argmin(distances)
 
-    fig, axs = plt.subplots(2, 2)
+            new_y_pos_history.append(y_pos_history[index_closest_value])
+            new_x_pos_history.append(x_pos_history[index_closest_value])
+            new_yaw_history.append(yaw_history[index_closest_value])
+            new_vel_history.append(vel_history[index_closest_value])
+            new_time_stamps.append(time_stamps[index_closest_value])
 
-    axs[0, 0].set_title('X pos')
-    axs[0, 0].plot(new_time_stamps, new_x_pos_history, label='History')
-    axs[0, 0].plot(new_time_stamps, reference_x[0,:], label='Reference')
-    axs[0, 0].legend(loc="upper left")
+        fig, axs = plt.subplots(2, 2)
 
-    axs[0, 1].set_title('Y pos')
-    axs[0, 1].plot(new_time_stamps, new_y_pos_history, label='History')
-    axs[0, 1].plot(new_time_stamps, reference_x[1,:], label='Reference')
-    axs[0, 1].legend(loc="upper left")
+        axs[0, 0].set_title('X pos')
+        axs[0, 0].plot(new_time_stamps, new_x_pos_history, label='History')
+        axs[0, 0].plot(new_time_stamps, reference_x[0,:], label='Reference')
+        axs[0, 0].legend(loc="upper left")
 
-    axs[1, 0].set_title('Vehicle velocity')
-    axs[1, 0].plot(new_time_stamps, new_vel_history, label='History')
-    axs[1, 0].plot(new_time_stamps, reference_x[2, :], label='Reference')
-    axs[1, 0].legend(loc="upper left")
+        axs[0, 1].set_title('Y pos')
+        axs[0, 1].plot(new_time_stamps, new_y_pos_history, label='History')
+        axs[0, 1].plot(new_time_stamps, reference_x[1,:], label='Reference')
+        axs[0, 1].legend(loc="upper left")
 
-    axs[1, 1].set_title('Vehicle yaw')
-    axs[1, 1].plot(new_time_stamps, new_yaw_history, label='History')
-    axs[1, 1].plot(new_time_stamps, reference_x[3, :], label='Reference')
-    axs[1, 1].legend(loc="upper left")
+        axs[1, 0].set_title('Vehicle velocity')
+        axs[1, 0].plot(new_time_stamps, new_vel_history, label='History')
+        axs[1, 0].plot(new_time_stamps, reference_x[2, :], label='Reference')
+        axs[1, 0].legend(loc="upper left")
 
-    plt.show()
+        axs[1, 1].set_title('Vehicle yaw')
+        axs[1, 1].plot(new_time_stamps, new_yaw_history, label='History')
+        axs[1, 1].plot(new_time_stamps, reference_x[3, :], label='Reference')
+        axs[1, 1].legend(loc="upper left")
+
+        plt.show()

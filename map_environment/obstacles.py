@@ -38,14 +38,18 @@ class Rectangle:
 
 class Circle:
 
-    MARGIN = 10
+    MARGIN = 5
 
     def __init__(self, center: np.array, size: float):
+        """Initialise an obstacle for the environment.
+        :param center: center of the pillar.
+        :param size: radius of the pillar
+        """
         self.center = center
         self.size = size
 
     def boundary_points(self):
-        """Return xy boundaries of the rectangle obstacle."""
+        """Return center x, y  and size of the circle."""
         return self.center[0], self.center[1], self.size
 
     def is_point_in_shape_area(self, point):

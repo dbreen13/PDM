@@ -27,13 +27,13 @@ class Environment:
         self.car.set_colorkey(self.RGB_WHITE_CODE)
         self.car.fill(self.RGB_RED_CODE)
 
-        self._draw_margins = True
+        self.draw_margins = True
         self.draw_obstacles()
 
 
     def draw_obstacles(self):
         """Draw the obstacles in the application."""
-        if self._draw_margins:
+        if self.draw_margins:
             for obstacle in self.c_space_obstacles:
                 obstacle_position = obstacle.position - np.array([obstacle.MARGIN, obstacle.MARGIN])
                 obstacle_size = obstacle.size + 2 * np.array([obstacle.MARGIN, obstacle.MARGIN])
@@ -68,7 +68,7 @@ class Environment:
             py.draw.line(self.screen, self.RGB_GREEN_CODE, start_pos, end_pos, width=2)
 
     def draw_coordinates(self, coordinates):
-        """ """
+        """Draw coordinates as points on the screen."""
         for coordinate in coordinates:
             py.draw.circle(self.screen, self.RGB_GREEN_CODE, coordinate, 2)
 
@@ -81,7 +81,7 @@ class Environment:
 
     def update_background(self, color):
         """Update the background color."""
-        self._draw_margins = False
+        self.draw_margins = False
         self.screen.fill(color)
         self.draw_obstacles()
         py.display.update()

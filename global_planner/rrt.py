@@ -116,17 +116,24 @@ class RRT:
 
         if rewire:
             print(f'LOGGER: Done building roadmap, nodes: {self.nodes.shape[0]} , start rewiring path...')
-            self.rewire_nodes(update_screen)
+            self.rewire_nodes(q_goal, update_screen)
 
         return self.nodes, self.edges
 
-    def rewire_nodes(self, update_screen):
-        """ according to prims algorithm"""
+    def rewire_nodes(self, q_goal, update_screen=True):
+        """Rewire the set of nodes with new edges to define the minimal spanning tree using Prim's algorithm.
+        :param q_goal: Ending position for the tree
+        :param update_screen: Update the pygame screen between iterations
+        """
         adjacency_matrix = self.generate_adjacency_matrix_of_nodes()
         selected_node = np.array([False] * adjacency_matrix.shape[0])
 
         new_edges = np.empty((0, 2), dtype='int')
         amount_of_nodes = adjacency_matrix.shape[0]
+
+        index_of_endpoint = None
+        if q_goal.tolist() not in self.nodes.tolist():
+            index_of_endpoint = np.where(self.nodes == q_goal)[0][0]
 
         selected_node[0] = True
         while new_edges.shape[0] < amount_of_nodes - 1:
@@ -151,10 +158,18 @@ class RRT:
             new_edges = np.vstack((new_edges, new_edge_indices))
 
             selected_node[optimal_col_node] = True
+
+            if index_of_endpoint and selected_node[index_of_endpoint]:
+                break
+
         self.edges = new_edges
 
     def generate_adjacency_matrix_of_nodes(self):
-        """ """
+        """Define the adjacency matrix of the current nodes.
+
+        :returns:
+            The adjacency matrix of the current nodes
+        """
         adjacency_matrix = []
 
         for selected_node in self.nodes:
@@ -285,12 +300,22 @@ class RRT:
         return intermediate_nodes
 
     @staticmethod
-    def coordinates_from_shortest_path(nodes, shortest_path):
-        """ """
+    def coordinates_from_shortest_path(nodes, shortest_path, discretize_factor=0.1):
+        """Define the shortest path coordinates based on the nodes, edges and discretize factor.
+        :param nodes:
+            The nodes of the roadmap
+        :param shortest_path:
+            The edges corresponding to the shortest path
+        :param discretize_factor:
+            Discretize factor to change amount of points between a line
+
+        :returns:
+            Returns the (x, y) coordinates of the shortest path
+        """
         coordinates = []
         for shortest_path_edge in shortest_path:
             coordinate_edge = nodes[shortest_path_edge[0]], nodes[shortest_path_edge[1]]
-            amount_of_points = int(np.linalg.norm(coordinate_edge[1] - coordinate_edge[0]) / 10)
+            amount_of_points = int(np.linalg.norm(coordinate_edge[1] - coordinate_edge[0]) * discretize_factor)
 
             discretize_edge = RRT.discretize_edge(coordinate_edge, points=amount_of_points)
             discretize_edge = np.round(discretize_edge)

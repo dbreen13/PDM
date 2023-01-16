@@ -3,62 +3,41 @@ import control as ctrl
 
 
 class VehicleDynamics:
-    """Base class in which the vehicle dynamics are defined"""
 
-    # variables used
     SAMPLING_TIME = 0.10
     WHEEL_BASE_LENGTH = 7.5  # length of the wheelbase [dm]
 
-    TARGET_SPEED = 8.0  # target speed [dm/s]
+    TARGET_SPEED = 13.0  # target speed [dm/s]
 
     MAX_STEER_ANGLE = np.deg2rad(45.0)  # maximum steering angle [rad]
     MAX_STEER_ANGLE_SPEED = np.deg2rad(30.0)  # maximum steering angle [rad/s]
 
-    MAX_SPEED = 11.  # maximum speed [dm/s]
+    MAX_SPEED = 15.  # maximum speed [dm/s]
     MIN_SPEED = 0.0  # minimum speed [dm/s]
     MAX_ACCEL = 0.75  # maximum accel [dm/ss]
 
     def __init__(self, x_pos=0.0, y_pos=0.0, yaw=0.0, velocity=0.0, sampling_time=SAMPLING_TIME):
-        """ Create a variable object which can be used for the vehicle dynamics
-        :param dt: The sampling time
-        :param x_pos; The position in the x-direction
-        :param y_pos: The position in the y-direction
-        :param vel: The longitudinal velocity
-        :param yaw: The yaw of the mobile robot
-        :param A: initialization of the A matrix
-        :param B: initialization of the B matrix
-        :param C: initialization of the C matrix
-        """
-        self.dt = sampling_time
+        """ Create a variable object which can be used for the vehicle dynamics."""
+        self.dt = sampling_time # The sampling time
 
-        self.x_pos = x_pos
-        self.y_pos = y_pos
-        self.vel = velocity
-        self.yaw = yaw
+        self.x_pos = x_pos # The position in the x-direction
+        self.y_pos = y_pos # The position in the y-direction
+        self.vel = velocity # The longitudinal velocity
+        self.yaw = yaw # The yaw of the mobile robot
 
-        self.A = np.eye(4)
-        self.B = np.zeros((4, 2))
-        self.C = np.zeros(4)
+        self.A = np.eye(4) # Initialization of the A matrix
+        self.B = np.zeros((4, 2)) # Initialization of the B matrix
+        self.C = np.zeros(4) # Initialization of the C matrix
 
     def reset_state(self):
-        """ Reset the state to the initial conditions 
-        :param x_pos; The position in the x-direction
-        :param y_pos: The position in the y-direction
-        :param vel: The longitudinal velocity
-        :param yaw: The yaw of the mobile robot
-        """
+        """ Reset the state to the initial conditions."""
         self.x_pos = 0.
         self.y_pos = 0.
         self.vel = 0.
         self.yaw = 0.
 
     def get_current_state(self):
-        """Return the values of the current state as an np.array 
-        :param x_pos; The position in the x-direction
-        :param y_pos: The position in the y-direction
-        :param vel: The longitudinal velocity
-        :param yaw: The yaw of the mobile robot
-        """
+        """Return the values of the current state as an np.array."""
         return np.array([self.x_pos, self.y_pos, self.vel, self.yaw])
 
     def update_state(self, control_vec):
@@ -132,13 +111,21 @@ class VehicleDynamics:
 
         # check full rank controllability
         ctrl_mat = ctrl.ctrb(self.A, self.B)
-        rank_AB = 4 - np.linalg.matrix_rank(ctrl_mat)
+        4 - np.linalg.matrix_rank(ctrl_mat)
 
         return self.A, self.B, self.C
 
     @staticmethod
     def optimize_angle(previous_angle, new_angle):
-        """ Smoothen the angle to [-pi, pi]."""
+        """ Smoothen the angle to [-pi/2, pi/2].
+        :param previous_angle:
+            The previous angle of the vehicle
+        :param new_angle:
+            The new angle of the vehicle
+
+        :returns:
+            new angle but smooth, which means it is restricted to [-pi/2, pi/2]
+        """
         smooth_angle = new_angle
 
         angle_diff = new_angle - previous_angle
