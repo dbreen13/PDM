@@ -152,7 +152,7 @@ if __name__ == '__main__':
 
     # Main loop
     running = True
-    use_debug = False
+    use_debug = True
 
     while running:
         py.display.update()
