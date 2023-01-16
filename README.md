@@ -73,7 +73,7 @@ There are a few known bugs to the current code implementation.
 The _res_, short for resource, folder has some images which are displayed below to give a short impression on the result of running the solution.
 
 ### Example simulation
-[video_simulation_example.mp4](res/video_simulation_example.mp4)
+https://user-images.githubusercontent.com/45165354/212667802-c4b947cf-b920-4696-a01f-07e2741c741b.mp4
 
 ### Example of a run in simulation
 ![alt text](res/img_path_run_1.jpg)
